@@ -32,8 +32,8 @@ def initial_setup
 end
 
 def initialise_shopify_app
-  copy_file ".env"
-  copy_file ".env.example"
+  copy_file ".env.example", ".env.example"
+  copy_file ".env.example", ".env"
 
   generate "shopify_app"
 end
