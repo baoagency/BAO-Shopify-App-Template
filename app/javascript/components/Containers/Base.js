@@ -24,6 +24,10 @@ const Container = ({ apiKey, children, shopOrigin }) => {
 Container.propTypes = {
   apiKey: PropTypes.string,
   shopOrigin: PropTypes.string,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node
+  ]).isRequired
 }
 
 export default Container

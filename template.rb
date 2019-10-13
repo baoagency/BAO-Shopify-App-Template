@@ -95,7 +95,8 @@ def add_sidekiq
 end
 
 def add_js_linting
-  run "yarn add -D @by-association-only/eslint-config-unisian"
+  copy_file ".eslintrc.js"
+  run "yarn add -D @by-association-only/eslint-config-unisian eslint eslint-plugin-react"
   package_json_content = <<-PACKAGE
   "scripts": {
     "lint:js": "eslint 'app/javascript/**/*.js' --fix",
@@ -150,6 +151,7 @@ after_bundle do
 
   copy_templates
 
+  rails_command "db:drop"
   rails_command "db:create"
   rails_command "db:migrate"
 
