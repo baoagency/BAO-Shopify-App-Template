@@ -74,13 +74,13 @@ def add_react_rails
     before: APPLICATION_BEFORE
 
   home_controller_content = <<-RUBY
-    component: 'Containers/Home', props: {
+    render component: 'Containers/Home', props: {
       apiKey: ShopifyApp.configuration.api_key,
       shopOrigin: @shop_session.url,
     }
   RUBY
   insert_into_file "app/controllers/home_controller.rb",
-    "\n#{home_controller_content}",
+    "\n\n#{home_controller_content}",
     after: "@webhooks = ShopifyAPI::Webhook.find(:all)"
 end
 
