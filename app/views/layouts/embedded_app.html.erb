@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <% application_name = ShopifyApp.configuration.application_name %>
+    <title><%= application_name %></title>
+    <%= stylesheet_link_tag 'application' %>
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <%= csrf_meta_tags %>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@shopify/polaris@4.5.0/styles.min.css"
+      />
+  </head>
+
+  <body>
+    <div class="app-wrapper">
+      <div class="app-content">
+        <main role="main">
+          <%= yield %>
+        </main>
+      </div>
+    </div>
+
+    <%= render 'layouts/flash_messages' %>
+
+    <%= content_tag(:div, nil, id: 'shopify-app-init', data: {
+      api_key: ShopifyApp.configuration.api_key,
+      shop_origin: ("https://#{ @shop_session.url }" if @shop_session),
+      debug: Rails.env.development?
+    } ) %>
+
+    <% if content_for?(:javascript) %>
+      <div id="ContentForJavascript" data-turbolinks-temporary>
+        <%= yield :javascript %>
+      </div>
+    <% end %>
+
+    <script src="https://unpkg.com/@shopify/app-bridge"></script>
+    <script>
+      var AppBridge = window['app-bridge'];
+      var actions = window['app-bridge'].actions;
+      var createApp = AppBridge.default;
+      var shopifyConfig = {
+        apiKey: "<%= ShopifyApp.configuration.api_key %>",
+        shopOrigin: "<%= (@shop_session.url if @shop_session) %>"
+      }
+      var app = createApp({
+        apiKey: "<%= ShopifyApp.configuration.api_key %>",
+        shopOrigin: "<%= (@shop_session.url if @shop_session) %>"
+      })
+    </script>
+  </body>
+</html>
