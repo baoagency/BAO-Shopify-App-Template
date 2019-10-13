@@ -18,8 +18,9 @@ def add_gems
   gem "sidekiq-statistic"
   gem "sidekiq-status"
   gem "sidekiq-failures"
-  gem 'friendly_id'
-  gem 'rack-cors'
+  gem "friendly_id"
+  gem "rack-cors"
+  gem "annotate", group: [:development]
 end
 
 def initial_setup
@@ -29,11 +30,13 @@ def initial_setup
   insert_into_file "config/application.rb",
     "    config.generators.system_tests = false\n",
     before: APPLICATION_BEFORE
+
+  generate "annotate:install"
 end
 
 def initialise_shopify_app
-  copy_file ".env.example", ".env.example"
-  copy_file ".env.example", ".env"
+  template "example.env.tt"
+  template "example.env.tt", ".env"
 
   generate "shopify_app"
 end
