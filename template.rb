@@ -10,6 +10,9 @@ APPLICATION_BEFORE = "\n    # Settings in config/environments/* take precedence 
 # copy_file and template resolve against our source files. If this file was
 # invoked remotely via HTTP, that means the files are not present locally.
 # In that case, use `git clone` to download them to a local temporary dir.
+require "fileutils"
+require "shellwords"
+
 def add_template_repository_to_source_path
   if __FILE__ =~ %r{\Ahttps?://}
     require "tmpdir"
