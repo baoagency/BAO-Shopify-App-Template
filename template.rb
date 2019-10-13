@@ -158,6 +158,7 @@ end
 
 def copy_templates
   directory "app", force: true
+  directory "config", force: true
 end
 
 add_template_repository_to_source_path
