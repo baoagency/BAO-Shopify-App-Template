@@ -124,8 +124,7 @@ def add_js_linting
   run "yarn add -D @by-association-only/eslint-config-unisian eslint eslint-plugin-react"
   package_json_content = <<-PACKAGE
   "scripts": {
-    "lint:js": "eslint 'app/javascript/**/*.js' --fix",
-    "precommit": "lint-staged"
+    "lint:js": "eslint 'app/javascript/**/*.js' --fix"
   },
   "husky": {
     "hooks": {
