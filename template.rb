@@ -82,6 +82,8 @@ def add_react_rails
   insert_into_file "app/controllers/home_controller.rb",
     "\n\n#{home_controller_content}",
     after: "@webhooks = ShopifyAPI::Webhook.find(:all)"
+
+  generate 'react:install'
 end
 
 def add_cors
