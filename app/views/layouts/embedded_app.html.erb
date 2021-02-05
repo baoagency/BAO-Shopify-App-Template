@@ -4,17 +4,32 @@
     <meta charset="utf-8" />
     <% application_name = ShopifyApp.configuration.application_name %>
     <title><%= application_name %></title>
-    <%= stylesheet_link_tag 'application' %>
-    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
-    <%= csrf_meta_tags %>
 
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/@shopify/polaris@4.5.0/styles.min.css"
-      />
+    <%= stylesheet_link_tag 'application' %>
+
+    <% if ShopifyApp.use_webpacker? %>
+      <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <% else %>
+      <%= javascript_include_tag 'application', "data-turbolinks-track" => true %>
+    <% end %>
+
+    <%= csrf_meta_tags %>
   </head>
 
   <body>
+    <header>
+      <nav>
+        <ul>
+          <li>
+            <%= link_to 'Home', home_path(shop: @shop_origin), class: 'Polaris-Link' %>
+          </li>
+          <li>
+            <%= link_to 'About', about_path(shop: @shop_origin), class: 'Polaris-Link' %>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
     <div class="app-wrapper">
       <div class="app-content">
         <main role="main">
@@ -25,10 +40,13 @@
 
     <%= render 'layouts/flash_messages' %>
 
+    <script src="https://unpkg.com/@shopify/app-bridge"></script>
+
     <%= content_tag(:div, nil, id: 'shopify-app-init', data: {
       api_key: ShopifyApp.configuration.api_key,
-      shop_origin: ("https://#{ @shop_session.url }" if @shop_session),
-      debug: Rails.env.development?
+      shop_origin: @shop_origin || (@current_shopify_session.domain if @current_shopify_session),
+      debug: Rails.env.development?,
+      load_path: params[:return_to] || home_path
     } ) %>
 
     <% if content_for?(:javascript) %>
@@ -36,20 +54,5 @@
         <%= yield :javascript %>
       </div>
     <% end %>
-
-    <script src="https://unpkg.com/@shopify/app-bridge"></script>
-    <script>
-      var AppBridge = window['app-bridge'];
-      var actions = window['app-bridge'].actions;
-      var createApp = AppBridge.default;
-      var shopifyConfig = {
-        apiKey: "<%= ShopifyApp.configuration.api_key %>",
-        shopOrigin: "<%= (@shop_session.url if @shop_session) %>"
-      }
-      var app = createApp({
-        apiKey: "<%= ShopifyApp.configuration.api_key %>",
-        shopOrigin: "<%= (@shop_session.url if @shop_session) %>"
-      })
-    </script>
   </body>
 </html>

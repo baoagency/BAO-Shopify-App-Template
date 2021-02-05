@@ -1,0 +1,33 @@
+<div class="Polaris-Page">
+  <div class="Polaris-Page-Header Polaris-Page-Header--hasNavigation Polaris-Page-Header--hasActionMenu Polaris-Page-Header--mobileView Polaris-Page-Header--mediumTitle">
+    <div class="Polaris-Page-Header__Row">
+      <div class="Polaris-Page-Header__TitleWrapper">
+        <div>
+          <div class="Polaris-Header-Title__TitleAndSubtitleWrapper">
+            <h1 class="Polaris-Header-Title">Home</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="Polaris-Page__Content">
+    <h2>Products</h2>
+    <div id="products">
+      <% @products.each do |product| %>
+        <p><%= product.title %></p>
+      <% end %>
+    </div>
+    <h2>Webhooks</h2>
+
+    <% if @webhooks.present? %>
+      <ul>
+        <% @webhooks.each do |webhook| %>
+          <li><%= webhook.topic %> : <%= webhook.address %></li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>This app has not created any webhooks for this Shop. Add webhooks to your ShopifyApp initializer if you need webhooks</p>
+    <% end %>
+  </div>
+</div>

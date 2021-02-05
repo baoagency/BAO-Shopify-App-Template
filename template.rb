@@ -6,6 +6,12 @@ Instructions: $ rails new myapp -d postgresql --webpack=react -m https://raw.git
 
 APPLICATION_BEFORE = "\n    # Settings in config/environments/* take precedence over those specified here."
 
+NGROK_DOMAIN = ask('What will the NGROK domain be?')
+SHOPIFY_API_KEY = ask("What is the App's API key?")
+SHOPIFY_API_SECRET = ask("What is the App's API secret?")
+SHOPIFY_SCOPES = ask("What scopes does the app want?")
+SHOPIFY_SCOPES = 'write_products' unless SHOPIFY_SCOPES
+
 # Add this template directory to source_paths so that Thor actions like
 # copy_file and template resolve against our source files. If this file was
 # invoked remotely via HTTP, that means the files are not present locally.
@@ -33,15 +39,10 @@ def add_template_repository_to_source_path
 end
 
 def add_gems
-  gem "shopify_app", "~>11.2.0"
-  gem "react-rails"
-  gem "sidekiq"
-  gem "sidekiq-throttled"
-  gem "sidekiq-statistic"
-  gem "sidekiq-status"
-  gem "sidekiq-failures"
-  gem "friendly_id"
-  gem "rack-cors"
+  gem 'shopify_app', '~> 17.0.5'
+  gem 'hotwire-rails'
+  gem 'rack-cors', :require => 'rack/cors'
+
   gem "annotate", group: [:development]
 end
 
@@ -52,6 +53,9 @@ def initial_setup
   insert_into_file "config/application.rb",
     "    config.generators.system_tests = false\n",
     before: APPLICATION_BEFORE
+  insert_into_file "config/environments/development.rb",
+    "\n    config.hosts << '#{NGROK_DOMAIN}'",
+    after: "config.file_watcher = ActiveSupport::EventedFileUpdateChecker"
 
   generate "annotate:install"
 end
@@ -59,31 +63,18 @@ end
 def initialise_shopify_app
   template "example.env.tt"
   template "example.env.tt", ".env"
+  template "example.env.tt", ".env.example"
+
+  gsub_file '.env', /SHOPIFY_API_KEY=/, "SHOPIFY_API_KEY=#{SHOPIFY_API_KEY}"
+  gsub_file '.env', /SHOPIFY_API_SECRET=/, "SHOPIFY_API_SECRET=#{SHOPIFY_API_SECRET}"
+  gsub_file '.env', /SCOPES=/, "SCOPES=#{SHOPIFY_SCOPES}"
+  gsub_file '.env', /NGROK_WEBPACK_TUNNEL=/, "NGROK_WEBPACK_TUNNEL=#{NGROK_DOMAIN}"
 
   generate "shopify_app"
 end
 
-def add_react_rails
-  run "yarn add @shopify/app-bridge-react @shopify/polaris react_ujs"
-
-  insert_into_file "config/application.rb",
-    "    config.react.camelize_props = true\n",
-    before: APPLICATION_BEFORE
-  insert_into_file "config/application.rb",
-    "    Jbuilder.key_format camelize: :lower\n",
-    before: APPLICATION_BEFORE
-
-  home_controller_content = <<-RUBY
-    render component: 'Containers/Home', props: {
-      apiKey: ShopifyApp.configuration.api_key,
-      shopOrigin: @shop_session.url,
-    }
-  RUBY
-  insert_into_file "app/controllers/home_controller.rb",
-    "\n\n#{home_controller_content}",
-    after: "@webhooks = ShopifyAPI::Webhook.find(:all)"
-
-  generate 'react:install'
+def initialise_hotwire
+  rails_command 'hotwire:install'
 end
 
 def add_cors
@@ -95,35 +86,45 @@ def add_cors
       end
     end
   RUBY
+
   insert_into_file "config/application.rb",
     "#{cors_content}\n",
     before: APPLICATION_BEFORE
 end
 
-def add_sidekiq
-  insert_into_file "config/application.rb",
-    "config.active_job.queue_adapter = :sidekiq\n",
-    before: APPLICATION_BEFORE
-  insert_into_file "config/application.rb",
-    "Sidekiq.configure_server { |c| c.redis = { url: ENV['REDIS_URL'] } }\n",
-    before: APPLICATION_BEFORE
+def setup_webpacker
+  run "yarn add dotenv"
 
-  route_content = <<-RUBY
-     require 'sidekiq/web'
-    # require 'sidekiq/throttled/web'
-  
-    # Sidekiq::Throttled::Web.enhance_queues_tab!
-  
-    mount Sidekiq::Web => '/sidekiq'
-  RUBY
-  insert_into_file "config/routes.rb",
-    "#{route_content}\n",
-    after: "mount ShopifyApp::Engine, at: '/'\n"
+  webpacker_content = <<-JAVASCRIPT
+    const dotenv = require('dotenv')
+    dotenv.config({ path: '.env', silent: true })
+    
+    environment.config.merge({
+      devServer: {
+        public: process.env.NGROK_WEBPACK_TUNNEL,
+      },
+    })
+  JAVASCRIPT
+
+  inject_into_file './config/webpack/development.js', "\n#{webpacker_content}", after: "const environment = require('./environment')"
+end
+
+def setup_polaris
+  run "yarn add @shopify/app-bridge-utils @shopify/polaris"
+
+  inject_into_file './app/javascript/packs/application.js', "import '@shopify/polaris/dist/styles.css'", after: 'import "channels"'
+end
+
+def setup_shopify_jwt
+  gsub_file 'config/routes.rb', "root :to => 'home#index'", "root to: 'splash_page#index'"
+
+  route "get '/home', to: 'home#index', as: :home"
+  route "get '/about', to: 'home#about', as: :about"
 end
 
 def add_js_linting
   copy_file ".eslintrc.js"
-  run "yarn add -D @by-association-only/eslint-config-unisian eslint eslint-plugin-react"
+  run "yarn add -D @by-association-only/eslint-config-unisian eslint"
   package_json_content = <<-PACKAGE
   "scripts": {
     "lint:js": "eslint 'app/javascript/**/*.js' --fix"
@@ -154,10 +155,6 @@ def add_foreman
   copy_file "Procfile.dev"
 end
 
-def add_friendly_id
-  generate "friendly_id"
-end
-
 def copy_templates
   directory "app", force: true
   directory "config", force: true
@@ -169,16 +166,16 @@ add_gems
 after_bundle do
   initial_setup
   initialise_shopify_app
-  add_react_rails
+  initialise_hotwire
   add_js_linting
-  add_sidekiq
   add_foreman
-  add_friendly_id
   add_cors
+  setup_webpacker
+  setup_polaris
+  setup_shopify_jwt
 
   copy_templates
 
-  rails_command "db:drop"
   rails_command "db:create"
   rails_command "db:migrate"
 
