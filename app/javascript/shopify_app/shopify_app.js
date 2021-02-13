@@ -10,39 +10,44 @@ function keepRetrievingToken (app) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  var data = document.getElementById('shopify-app-init').dataset
-  var AppBridge = window['app-bridge']
-  var createApp = AppBridge.default
+  const data = document.getElementById('shopify-app-init').dataset
+  const AppBridge = window['app-bridge']
+  const createApp = AppBridge.default
   window.app = createApp({
     apiKey: data.apiKey,
     shopOrigin: data.shopOrigin,
   })
 
-  var actions = AppBridge.actions
-  var TitleBar = actions.TitleBar
-  TitleBar.create(app, {
+  const actions = AppBridge.actions
+  const TitleBar = actions.TitleBar
+  TitleBar.create(window.app, {
     title: data.page,
   })
 
   // Wait for a session token before trying to load an authenticated page
-  await retrieveToken(app)
+  await retrieveToken(window.app)
 
   // Redirect to the requested page
   Turbo.visit(data.loadPath)
 
   // Keep retrieving a session token periodically
-  keepRetrievingToken(app)
+  keepRetrievingToken(window.app)
 })
 
-document.addEventListener('turbo:before-fetch-request', e => {
+document.addEventListener('turbo:before-fetch-request', async e => {
   e.detail.fetchOptions.headers.Authorization = `Bearer ${window.sessionToken}`
 })
 
-document.addEventListener('turbo:visit', () => {
-  const AppBridge = window['app-bridge']
-  const actions = AppBridge.actions
-  const History = actions.History
-  const history = History.create(window.app)
+// Force redirect via turbo using turbo_redirect_to helper in controller.
+// Mandatory for Safari since it's loosing JWT token during 302 redirect.
+document.addEventListener('turbo:before-fetch-response', (event) => {
+  const response = event.detail.fetchResponse
+  const status = response.statusCode
+  const location = response.header('Location')
 
-  history.dispatch(History.Action.PUSH, window.location.pathname)
+  if (status === 300 && location !== null) {
+    event.preventDefault()
+
+    Turbo.visit(location)
+  }
 })

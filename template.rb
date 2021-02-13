@@ -110,7 +110,7 @@ def setup_webpacker
 end
 
 def setup_polaris
-  run "yarn add @shopify/app-bridge-utils @shopify/polaris"
+  run "yarn add @shopify/app-bridge @shopify/app-bridge-utils @shopify/polaris"
 
   inject_into_file './app/javascript/packs/application.js', "import '@shopify/polaris/dist/styles.css'", after: 'import "channels"'
 end
