@@ -42,6 +42,7 @@ def add_gems
   gem 'shopify_app', '~> 17.0.5'
   gem 'hotwire-rails'
   gem 'rack-cors', :require => 'rack/cors'
+  gem "view_component", require: "view_component/engine"
 
   gem "annotate", group: [:development]
 end
