@@ -3,15 +3,19 @@
 // a relevant structure within app/javascript and only use these pack files to reference
 // that code so it'll be compiled.
 
-import Rails from "@rails/ujs"
-import "@hotwired/turbo-rails"
-import * as ActiveStorage from "@rails/activestorage"
-import "channels"
+// import Rails from "@rails/ujs"
+// Rails.start()
+// The above is currently breaking form submissions when using Turbo. Not sure what else it does
+// but probably worth leaving this note.
 
-Rails.start()
-ActiveStorage.start()
+require('shopify_app')
 
-import "controllers"
-require("shopify_app")
+import '@hotwired/turbo-rails'
+import * as ActiveStorage from '@rails/activestorage'
+import 'channels'
+import 'controllers'
+import '../components'
 
 import '@shopify/polaris/dist/styles.css'
+
+ActiveStorage.start()

@@ -119,8 +119,8 @@ end
 def setup_shopify_jwt
   gsub_file 'config/routes.rb', "root :to => 'home#index'", "root to: 'splash_page#index'"
 
-  route "get '/home', to: 'home#index', as: :home"
-  route "get '/about', to: 'home#about', as: :about"
+  route "get '/home', to: 'pages#index', as: :home"
+  route "get '/about', to: 'pages#about', as: :about"
 end
 
 def add_js_linting
