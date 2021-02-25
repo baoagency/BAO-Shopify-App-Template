@@ -1,6 +1,8 @@
 import { Turbo } from '@hotwired/turbo-rails'
 import { getSessionToken } from '@shopify/app-bridge-utils'
 
+const LANDING_PATH = '/home'
+
 document.addEventListener('turbo:before-fetch-request', async e => {
   e.detail.fetchOptions.headers.Authorization = `Bearer ${window.sessionToken}`
 })
@@ -57,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         shouldRedirect = validLoadPath
         break
       case false:
-        shouldRedirect = validLoadPath && data.loadPath !== '/landing' // Replace with the app's
+        shouldRedirect = validLoadPath && data.loadPath !== LANDING_PATH // Replace with the app's
         // home_path
         break
     }
