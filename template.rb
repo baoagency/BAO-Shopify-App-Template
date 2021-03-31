@@ -1,7 +1,7 @@
 =begin
 Author: By Association Only
 Author URI: https://byassociationonly.com
-Instructions: $ rails new myapp -d postgresql --webpack=react -m https://raw.githubusercontent.com/baoagency/BAO-Shopify-App-Template/master/template.rb
+Instructions: $ rails new myapp -d postgresql -m https://raw.githubusercontent.com/baoagency/BAO-Shopify-App-Template/master/template.rb
 =end
 
 APPLICATION_BEFORE = "\n    # Settings in config/environments/* take precedence over those specified here."
