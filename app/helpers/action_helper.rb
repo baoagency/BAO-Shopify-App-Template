@@ -1,4 +1,35 @@
-module ComplexActionHelper
+module ActionHelper
+  class Action
+    attr_reader :content
+
+    def initialize(
+      content:,
+      url:,
+      accessibility_label: '',
+      external: false,
+      id: '',
+      data: {}
+    )
+      @content = content
+      @accessibility_label = accessibility_label
+      @external = external
+      @id = id
+      @url = url
+      @data = data
+    end
+
+    def to_h
+      {
+        content: @content,
+        accessibility_label: @accessibility_label,
+        external: @external,
+        id: @id,
+        url: @url,
+        data: @data,
+      }
+    end
+  end
+
   class ComplexAction
     attr_reader :content
 
@@ -42,8 +73,24 @@ module ComplexActionHelper
     end
   end
 
+  def action(**args)
+    Action.new(**args)
+  end
+
   def complex_action(**args)
     ComplexAction.new(**args)
+  end
+
+  def render_action(action)
+    render Polaris::Button::Component.new(**action.to_h.except(:content)) do
+      action.content
+    end
+  end
+
+  def render_plain_action(action)
+    render Polaris::Button::Component.new(**action.to_h.except(:content), plain: true) do
+      action.content
+    end
   end
 
   def render_complex_action_button(complex_action)
