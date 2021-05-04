@@ -40,7 +40,7 @@ def add_template_repository_to_source_path
 end
 
 def add_gems
-  gem 'shopify_app', '~> 17.0.5'
+  gem 'shopify_app'
   gem 'hotwire-rails'
   gem 'rack-cors', :require => 'rack/cors'
   gem "view_component", require: "view_component/engine"
