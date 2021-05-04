@@ -7,6 +7,7 @@ Instructions: $ rails new myapp -d postgresql -m https://raw.githubusercontent.c
 APPLICATION_BEFORE = "\n    # Settings in config/environments/* take precedence over those specified here."
 
 NGROK_DOMAIN = ask('What will the NGROK domain be?')
+NGROK_WEBPACK_DOMAIN = ask('What will the Webpack NGROK domain be?')
 SHOPIFY_API_KEY = ask("What is the App's API key?")
 SHOPIFY_API_SECRET = ask("What is the App's API secret?")
 SHOPIFY_SCOPES = ask("What scopes does the app want?")
@@ -69,7 +70,7 @@ def initialise_shopify_app
   gsub_file '.env', /SHOPIFY_API_KEY=/, "SHOPIFY_API_KEY=#{SHOPIFY_API_KEY}"
   gsub_file '.env', /SHOPIFY_API_SECRET=/, "SHOPIFY_API_SECRET=#{SHOPIFY_API_SECRET}"
   gsub_file '.env', /SCOPES=/, "SCOPES=#{SHOPIFY_SCOPES}"
-  gsub_file '.env', /NGROK_WEBPACK_TUNNEL=/, "NGROK_WEBPACK_TUNNEL=#{NGROK_DOMAIN}"
+  gsub_file '.env', /NGROK_WEBPACK_TUNNEL=/, "NGROK_WEBPACK_TUNNEL=#{NGROK_WEBPACK_DOMAIN}"
 
   generate "shopify_app"
 end
