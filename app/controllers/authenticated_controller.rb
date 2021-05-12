@@ -9,11 +9,11 @@ class AuthenticatedController < ApplicationController
 
   private
 
-    def shop_origin
-      @shop_origin ||= current_shopify_domain
-    end
+  def shop_origin
+    @shop_origin ||= current_shopify_domain
+  end
 
-    def set_shop
-      @shop = Shop.find_by_shopify_domain(shop_origin)
-    end
+  def set_shop
+    @shop = Shop.find_by_shopify_domain(shop_origin)
+  end
 end

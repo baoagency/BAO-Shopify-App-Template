@@ -4,7 +4,7 @@ Author URI: https://byassociationonly.com
 Instructions: $ rails new myapp -d postgresql -m https://raw.githubusercontent.com/baoagency/BAO-Shopify-App-Template/master/template.rb
 =end
 
-APPLICATION_BEFORE = "\n    # Settings in config/environments/* take precedence over those specified here."
+APPLICATION_AFTER = "config.load_defaults 6.1"
 
 NGROK_DOMAIN = ask('What will the NGROK domain be?')
 NGROK_WEBPACK_DOMAIN = ask('What will the Webpack NGROK domain be?')
@@ -40,7 +40,7 @@ def add_template_repository_to_source_path
 end
 
 def add_gems
-  gem 'shopify_app'
+  gem 'shopify_app', '~> 18.0.1'
   gem 'hotwire-rails'
   gem 'rack-cors', :require => 'rack/cors'
   gem "view_component", require: "view_component/engine"
@@ -51,10 +51,10 @@ end
 def initial_setup
   insert_into_file "config/application.rb",
     "config.generators.stylesheets = false\n",
-    before: APPLICATION_BEFORE
+    after: APPLICATION_AFTER
   insert_into_file "config/application.rb",
     "    config.generators.system_tests = false\n",
-    before: APPLICATION_BEFORE
+    after: APPLICATION_AFTER
   insert_into_file "config/environments/development.rb",
     "\n    config.hosts << '#{NGROK_DOMAIN}'",
     after: "config.file_watcher = ActiveSupport::EventedFileUpdateChecker"
@@ -77,6 +77,8 @@ end
 
 def initialise_hotwire
   rails_command 'hotwire:install'
+
+  run 'bundle install'
 end
 
 def add_cors
@@ -91,7 +93,7 @@ def add_cors
 
   insert_into_file "config/application.rb",
     "#{cors_content}\n",
-    before: APPLICATION_BEFORE
+    after: APPLICATION_AFTER
 end
 
 def setup_webpacker
@@ -108,20 +110,13 @@ def setup_webpacker
     })
   JAVASCRIPT
 
+  gsub_file 'config/webpacker.yml', /additional_paths: \[\]/, "additional_paths: ['app/components']"
+
   inject_into_file './config/webpack/development.js', "\n#{webpacker_content}", after: "const environment = require('./environment')"
 end
 
 def setup_polaris
   run "yarn add @shopify/app-bridge @shopify/app-bridge-utils @shopify/polaris"
-
-  inject_into_file './app/javascript/packs/application.js', "import '@shopify/polaris/dist/styles.css'", after: 'import "channels"'
-end
-
-def setup_shopify_jwt
-  gsub_file 'config/routes.rb', "root :to => 'home#index'", "root to: 'splash_page#index'"
-
-  route "get '/home', to: 'pages#index', as: :home"
-  route "get '/about', to: 'pages#about', as: :about"
 end
 
 def add_js_linting
@@ -174,7 +169,6 @@ after_bundle do
   add_cors
   setup_webpacker
   setup_polaris
-  setup_shopify_jwt
 
   copy_templates
 
