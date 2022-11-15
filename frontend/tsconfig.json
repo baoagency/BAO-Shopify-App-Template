@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "target": "ESNext",
+    "typeRoots": [
+      "types"
+    ],
+    "types": [
+      "node",
+      "vite/client"
+    ]
+  }
+}
