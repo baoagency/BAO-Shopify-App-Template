@@ -26,14 +26,27 @@ def add_template_repository_to_source_path
   end
 end
 
-def copy_directories
+def copy_files
   directory "app", force: true
+  directory "config", force: true
   directory "frontend", force: true
+
+  copy_file '.graphqlconfig'
+  copy_file 'generate-shopify-graphql-types.js'
+  copy_file 'schema.graphql'
+end
+
+def edit_base_files
+  insert_into_file(
+    "config/application.rb",
+    "    Jbuilder.key_format camelize: :lower\n\n",
+    before: "    # Configuration for the application, engines, and railties goes here."
+  )
 end
 
 def add_graphql
   inside("frontend") do
-    run "npm i graphql-request"
+    run "npm i graphql-request graphql @shopify/admin-graphql-api-utilities"
   end
 
   route 'post "/api/graphql", to: "graphql#proxy"'
@@ -51,6 +64,18 @@ def add_annotate
   generate "annotate:install"
 end
 
+def setup_api_routes
+  route_content = <<-ROUTE
+    resources :shops, controller: "api/v1/shops", path: "api/shops", only: [:show], param: :shopify_domain do
+      collection do
+        get :me
+      end
+    end
+  ROUTE
+
+  route route_content.to_s
+end
+
 def finish
   inside("../") do
     git add: "."
@@ -59,8 +84,10 @@ def finish
 end
 
 add_template_repository_to_source_path
-copy_directories
+copy_files
+edit_base_files
 add_graphql
 setup_frontend
 add_annotate
+setup_api_routes
 finish

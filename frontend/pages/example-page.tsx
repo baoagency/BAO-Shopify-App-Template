@@ -1,22 +1,8 @@
 import { Card, Page, Layout, TextContainer, Heading } from "@shopify/polaris";
-import { TitleBar } from "@shopify/app-bridge-react";
 
-export default function PageName() {
+export default function ExamplePage() {
   return (
-    <Page>
-      <TitleBar
-        title="Page name"
-        primaryAction={{
-          content: "Primary action",
-          onAction: () => console.log("Primary action"),
-        }}
-        secondaryActions={[
-          {
-            content: "Secondary action",
-            onAction: () => console.log("Secondary action"),
-          },
-        ]}
-      />
+    <Page title="Example page">
       <Layout>
         <Layout.Section>
           <Card sectioned>
@@ -25,6 +11,7 @@ export default function PageName() {
               <p>Body</p>
             </TextContainer>
           </Card>
+
           <Card sectioned>
             <Heading>Heading</Heading>
             <TextContainer>
@@ -32,9 +19,11 @@ export default function PageName() {
             </TextContainer>
           </Card>
         </Layout.Section>
+
         <Layout.Section secondary>
           <Card sectioned>
             <Heading>Heading</Heading>
+
             <TextContainer>
               <p>Body</p>
             </TextContainer>

@@ -7,32 +7,16 @@ import {
   DisplayText,
   TextStyle,
 } from "@shopify/polaris";
-import { Toast } from "@shopify/app-bridge-react";
+import { Toast, ToastProps } from "@shopify/app-bridge-react";
 import { useAppQuery } from '../hooks/useAppQuery'
 import { useAuthenticatedFetch } from '../hooks/useAuthenticatedFetch'
-import { useShopifyDomain } from '../hooks/useShopifyDomain'
-import { useShopifyQuery } from '../hooks/useShopifyQuery.js'
 
-const PRODUCTS_QUERY = gql`
-  {
-    products(first: 10, reverse: true) {
-      edges {
-        node {
-          id
-          title
-          handle
-        }
-      }
-    }
-  }
-`
+const emptyToastProps = { content: null, onDismiss: () => {} };
 
 export function ProductsCard() {
-  const emptyToastProps = { content: null };
   const [isLoading, setIsLoading] = useState(true);
-  const [toastProps, setToastProps] = useState(emptyToastProps);
+  const [toastProps, setToastProps] = useState<ToastProps>(emptyToastProps);
   const fetch = useAuthenticatedFetch();
-  const shopifyDomain = useShopifyDomain()
 
   const {
     data,
@@ -48,25 +32,6 @@ export function ProductsCard() {
     },
   });
 
-  const {
-    data: storeData,
-  } = useAppQuery({
-    url: `/api/shops/${shopifyDomain}`,
-    reactQueryOptions: {
-      onSuccess: () => {
-        // setIsLoading(false);
-      },
-    },
-  });
-
-  console.log({ storeData })
-
-  const res = useShopifyQuery({
-    key: 'products',
-    query: PRODUCTS_QUERY,
-  })
-  console.log({ res }, res.data)
-
   const toastMarkup = toastProps.content && !isRefetchingCount && (
     <Toast {...toastProps} onDismiss={() => setToastProps(emptyToastProps)} />
   );
@@ -77,12 +42,13 @@ export function ProductsCard() {
 
     if (response.ok) {
       await refetchProductCount();
-      setToastProps({ content: "5 products created!" });
+      setToastProps({ content: "5 products created!", onDismiss () {} });
     } else {
       setIsLoading(false);
       setToastProps({
         content: "There was an error creating products",
         error: true,
+        onDismiss () {},
       });
     }
   };
@@ -90,6 +56,7 @@ export function ProductsCard() {
   return (
     <>
       {toastMarkup}
+
       <Card
         title="Product Counter"
         sectioned
@@ -104,6 +71,7 @@ export function ProductsCard() {
             Sample products are created with a default title and price. You can
             remove them at any time.
           </p>
+
           <Heading element="h4">
             TOTAL PRODUCTS
             <DisplayText size="medium">

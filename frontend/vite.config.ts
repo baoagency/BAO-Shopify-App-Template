@@ -52,7 +52,8 @@ export default defineConfig({
   },
   server: {
     host: 'localhost',
-    port: Number(process.env.FRONTEND_PORT) || 5173,
+    // @ts-ignore
+    port: process.env.FRONTEND_PORT,
     hmr: hmrConfig,
     proxy: {
       '^/(\\?.*)?$': proxyOptions,

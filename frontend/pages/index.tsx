@@ -8,36 +8,14 @@ import {
   Link,
   Heading,
 } from "@shopify/polaris";
-import { TitleBar } from "@shopify/app-bridge-react";
 
 import { trophyImage } from "../assets";
 
 import { ProductsCard } from "../components";
-import { useAppQuery } from '../hooks/useAppQuery'
-import { useShopifyDomain } from '../hooks/useShopifyDomain'
 
 export default function HomePage() {
-  const shopifyDomain = useShopifyDomain()
-
-  const {
-    data,
-    refetch: refetchProductCount,
-    isLoading: isLoadingCount,
-    isRefetching: isRefetchingCount,
-  } = useAppQuery({
-    url: `/api/shops/me`,
-    reactQueryOptions: {
-      onSuccess: () => {
-        // setIsLoading(false);
-      },
-    },
-  });
-
-  console.log(data)
-
   return (
-    <Page narrowWidth>
-      <TitleBar title="App name" primaryAction={null} />
+    <Page title="Welcome!" narrowWidth>
       <Layout>
         <Layout.Section>
           <Card sectioned>
