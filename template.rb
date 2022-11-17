@@ -76,6 +76,11 @@ def setup_api_routes
   route route_content.to_s
 end
 
+def change_database
+  rails_command "db:system:change --to=postgresql"
+  run "bundle install"
+end
+
 def finish
   inside("../") do
     git add: "."
@@ -90,4 +95,5 @@ add_graphql
 setup_frontend
 add_annotate
 setup_api_routes
+change_database
 finish
