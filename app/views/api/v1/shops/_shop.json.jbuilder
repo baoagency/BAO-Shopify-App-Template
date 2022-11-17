@@ -1,1 +1,1 @@
-json.extract! shop, :shopify_domain, :api_key
+json.extract! shop, :shopify_domain
