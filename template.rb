@@ -79,6 +79,7 @@ end
 def change_database
   rails_command "db:system:change --to=postgresql"
   run "bundle install"
+  rails_command "db:{drop,create,migrate}"
 end
 
 def finish
